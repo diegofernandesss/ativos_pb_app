@@ -7,7 +7,7 @@ const getAll = async () => {
 
 const getAllPage = async (page, limit) => {
     let offset = (page - 1) * limit;
-    const [patentesConcedidas] = await connection.execute("SELECT * FROM patentes_concedidas order by data_deposito desc LIMIT ? OFFSET ?;",[limit,offset]);
+    const [patentesConcedidas] = await connection.execute(`SELECT * FROM patentes_concedidas order by data_deposito desc LIMIT ${limit} OFFSET ${offset};`);
     return patentesConcedidas;
 }
 
