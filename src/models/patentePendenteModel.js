@@ -7,7 +7,7 @@ const getAll = async () => {
 
 const getAllPages = async (page, limit) => {
     let offset = (page - 1) * limit;
-    const [patentesPendentes] = await connection.execute("SELECT * FROM patentes_pendentes LIMIT ? OFFSET ?;",[limit,offset]);
+    const [patentesPendentes] = await connection.execute(`SELECT * FROM patentes_pendentes LIMIT ${limit} OFFSET ${offset};`);
     return patentesPendentes;
 }
 
