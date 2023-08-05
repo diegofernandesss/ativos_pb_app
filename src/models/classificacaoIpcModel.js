@@ -11,7 +11,7 @@ const getSubSecaoIpc = async (id_secao) => {
 }
 
 const getCodigosSubSecaoIpc = async (id_sub_secao) => {
-    const [cods_sub] = await connection.execute("SELECT * FROM codigo_sub_secao WHERE id_sub_secao_ipc = ?", [id_sub_secao]);
+    const [cods_sub] = await connection.execute("SELECT codigo FROM codigo_sub_secao WHERE id_sub_secao_ipc = ?", [id_sub_secao]);
     return cods_sub;
 }
 

@@ -32,30 +32,44 @@ const getPatentePendente = async (request, response) => {
 
 const getFiltroIctPatentes = async (request, response) => {
     const {cnpj_ict} = request.params;
+    const {page, limit} = request.query;
     
     const patentes = patentesPendentesCorrigidas(await patentePendenteModel.getAll());
 
-    const ict = await ictsModel.getIct(cnpj_ict);
+    const [ict] = await ictsModel.getIct(cnpj_ict);
 
     if (ict.length == 0) {
         return response.status(404).json({mensege: "ict not found"});
     }
     
-    const patentesFiltrada = [];
+    let patentesFiltrada = [];
     for (const patente of patentes) {
-        for(const depositante of patente["depositantes"]) {
-            if (ict[0]["nome"] == depositante) {
-                patentesFiltrada.push(patente);
-                break;
-            }
+        if(patente["depositantes"].includes(ict["nome"])) {
+            patentesFiltrada.push(patente);
         }
     }
     if (!patentesFiltrada) {
         return response.status(404).json({mensege : "Patente not found!"})
     }
 
-    return response.status(200).json(patentesFiltrada);
 
+    if(page && limit) {
+        let patentePage = [];
+        let offset = (page - 1) * limit;
+        let tamanho = patentesFiltrada.length;
+        for(let i = offset; i < offset+Number(limit); i++) {
+            if(i >= tamanho) {
+                break;
+            }
+            patentePage.push(patentesFiltrada[i]);
+        }
+        patentesFiltrada = patentePage;
+    }
+    if(!patentesFiltrada) {
+        return response.status(404).json({mensege: "Patentes not found"});
+    }
+
+    return response.status(200).json(patentesFiltrada);
 };
 
 module.exports = {
