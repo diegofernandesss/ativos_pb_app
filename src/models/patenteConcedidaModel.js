@@ -1,23 +1,22 @@
 const connection = require("./connection");
 
 const getAll = async () => {
-    const [patentesPendentes] = await connection.execute("SELECT * FROM patentes_pendentes");
-    return patentesPendentes;
-}
+    const [patentesConcedidas] = await connection.execute("SELECT * FROM patentes_concedidas order by data_deposito desc");
+    return patentesConcedidas;
+};
 
-const getAllPages = async (page, limit) => {
+const getAllPage = async (page, limit) => {
     let offset = (page - 1) * limit;
-    const [patentesPendentes] = await connection.execute(`SELECT * FROM patentes_pendentes LIMIT ${limit} OFFSET ${offset};`);
-    return patentesPendentes;
+    const [patentesConcedidas] = await connection.execute(`SELECT * FROM patentes_concedidas ORDER BY data_deposito DESC LIMIT ${limit} OFFSET ${offset}`);
+    return patentesConcedidas;
 }
 
 const get = async (numero_pedido) => {
-    const [patentePendente] = await connection.execute("SELECT * FROM patentes_pendentes WHERE numero_pedido = ?",[numero_pedido]);
-    return patentePendente;
+    const [patenteConcedida] = await connection.execute("SELECT * FROM patentes_concedidas WHERE numero_pedido = ?",[numero_pedido]);
+    return patenteConcedida;
 };
-
 module.exports = {
     getAll,
-    getAllPages,
+    getAllPage,
     get,
 }

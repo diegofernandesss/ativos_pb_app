@@ -17,9 +17,9 @@ router
     .get("/patentes_concedidas", PatenteConcedidaController.getPatentesConcedidas)
     .get("/patente_concedida/:numero_pedido", PatenteConcedidaController.getPatenteConcedida)
     .get("/patentes_concedidas/ipc/:classificacao_ipc", PatenteConcedidaController.getFiltroIpcPatentes)
-    .get("/patentes_concedidas/classificacao_ipc/:id_sub_secao", PatenteConcedidaController.getFiltroCodigoIpcPatentes)
+    .get("/patentes_concedidas/classificacao_ipc/cod_subsecao/:id_sub_secao", PatenteConcedidaController.getFiltroPorCodigoIpc)
     .get("/patentes_concedidas/ict/:cnpj_ict", PatenteConcedidaController.getFiltroIctPatentes)
-    .get("/patentes_concedidas/:cnpj_ict/:classificacao_ipc", PatenteConcedidaController.getFiltroIctIpcPatentes)
+    //.get("/patentes_concedidas/:cnpj_ict/:classificacao_ipc", PatenteConcedidaController.getFiltroIctIpcPatentes)
 
 // Patentes Pendentes
 router
