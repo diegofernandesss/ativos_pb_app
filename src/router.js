@@ -7,6 +7,8 @@ const PatenteConcedidaController = require("./controllers/patenteConcedidaContro
 const PatentePendenteController = require("./controllers/patentePendenteController");
 const ClassificacoesIpcController = require("./controllers/classificacaoIpcController");
 
+const patenteMiddleware = require("./middlewares/patentesMiddleware");
+
 // Icts
 router
     .get("/icts", IctsController.getIcts)
@@ -14,18 +16,29 @@ router
 
 // Patentes Concedidas
 router
-    .get("/patentes_concedidas", PatenteConcedidaController.getPatentesConcedidas)
+    .get("/patentes_concedidas", 
+    patenteMiddleware.validarPageLimit, 
+    PatenteConcedidaController.getPatentesConcedidas)
+
     .get("/patente_concedida/:numero_pedido", PatenteConcedidaController.getPatenteConcedida)
-    .get("/patentes_concedidas/ipc/:classificacao_ipc", PatenteConcedidaController.getFiltroIpcPatentes)
-    .get("/patentes_concedidas/classificacao_ipc/cod_subsecao/:id_sub_secao", PatenteConcedidaController.getFiltroPorCodigoIpc)
-    .get("/patentes_concedidas/ict/:cnpj_ict", PatenteConcedidaController.getFiltroIctPatentes)
-    //.get("/patentes_concedidas/:cnpj_ict/:classificacao_ipc", PatenteConcedidaController.getFiltroIctIpcPatentes)
+
+    .get("/patentes_concedidas/ipc/:classificacao_ipc", 
+    patenteMiddleware.validarPageLimit, 
+    PatenteConcedidaController.getFiltroIpcPatentes)
+
+    .get("/patentes_concedidas/classificacao_ipc/cod_subsecao/:id_sub_secao",
+    patenteMiddleware.validarPageLimit, 
+    PatenteConcedidaController.getFiltroPorCodigoIpc)
+
+    .get("/patentes_concedidas/ict/:cnpj_ict", 
+    patenteMiddleware.validarPageLimit, 
+    PatenteConcedidaController.getFiltroIctPatentes)
 
 // Patentes Pendentes
 router
-    .get("/patentes_pendentes", PatentePendenteController.getPatentesPendentes)
-    .get("/patente_pendente/:numero_pedido", PatentePendenteController.getPatentePendente)
-    .get("/patentes_pendentes/ict/:cnpj_ict", PatentePendenteController.getFiltroIctPatentes)
+    .get("/patentes_pendentes", patenteMiddleware.validarPageLimit, PatentePendenteController.getPatentesPendentes)
+    .get("/patente_pendente/:numero_pedido", patenteMiddleware.validarPageLimit, PatentePendenteController.getPatentePendente)
+    .get("/patentes_pendentes/ict/:cnpj_ict", patenteMiddleware.validarPageLimit, PatentePendenteController.getFiltroIctPatentes)
 
 // Classificacões ipc
 router

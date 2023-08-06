@@ -3,17 +3,30 @@ const ictsModel = require("../models/ictsModel");
 const {patentesPendentesCorrigidas, patentePendenteCorrigida} = require("./correcoes");
 
 const getPatentesPendentes = async (request, response) => {
-
     const {page, limit} = request.query;
+
     if (page && limit) {
         var patentesPendentes = await patentePendenteModel.getAllPages(page, limit);
-    } else {
-        var patentesPendentes = await patentePendenteModel.getAll();
+        let totalPatentes = await patentePendenteModel.countPatentes();
+
+        let patentes = patentesPendentesCorrigidas(patentesPendentes);
+
+        let qtdPages = Math.ceil(totalPatentes.count/limit);
+        
+        return response.status(200).json({
+            number_pages: qtdPages,
+            patentes
+        });
     }
+    
+    var patentesPendentes = await patentePendenteModel.getAll();
 
     let patentes = patentesPendentesCorrigidas(patentesPendentes);
 
-    return response.status(200).json(patentes);
+    return response.status(200).json({
+        number_patentes: patentesPendentes.length,
+        patentes: patentesPendentes
+    });
 };
 
 const getPatentePendente = async (request, response) => {
@@ -54,22 +67,28 @@ const getFiltroIctPatentes = async (request, response) => {
 
 
     if(page && limit) {
-        let patentePage = [];
+        let patentesPage = [];
         let offset = (page - 1) * limit;
         let tamanho = patentesFiltrada.length;
+        let qtdPage = Math.ceil(tamanho/limit);
         for(let i = offset; i < offset+Number(limit); i++) {
             if(i >= tamanho) {
                 break;
             }
-            patentePage.push(patentesFiltrada[i]);
+            patentesPage.push(patentesFiltrada[i]);
         }
-        patentesFiltrada = patentePage;
-    }
-    if(!patentesFiltrada) {
-        return response.status(404).json({mensege: "Patentes not found"});
+        
+        return response.status(200).json({
+            number_pages: qtdPage,
+            patentes : patentesPage
+        });
     }
 
-    return response.status(200).json(patentesFiltrada);
+
+    return response.status(200).json({
+        number_patentes: patentesFiltrada.length,
+        patentes: patentesFiltrada
+    });
 };
 
 module.exports = {

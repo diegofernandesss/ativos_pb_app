@@ -11,11 +11,6 @@ const patentesConcedidasCorrigidas = (patentes) => {
         if(classificacoes_ipc) {
             classificacoes_ipc = classificacoes_ipc.split(";").map(removedorEspacos);
         }
-        
-        // let classificacoes_cpc = patente["classificacao_cpc"];
-        // if (classificacoes_cpc) {
-        //     classificacoes_cpc = classificacoes_cpc.split(";").map(removedorEspacos);
-        // }
 
         let depositantes = patente["depositantes"].split("/").map(removedorEspacos);
         
@@ -25,7 +20,6 @@ const patentesConcedidasCorrigidas = (patentes) => {
                 data_deposito,
                 data_publicacao,
                 classificacoes_ipc,
-                //classificacoes_cpc,
                 titulo: patente["titulo"],
                 depositantes,
     

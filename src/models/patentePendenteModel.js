@@ -16,8 +16,14 @@ const get = async (numero_pedido) => {
     return patentePendente;
 };
 
+const countPatentes = async () => {
+    const [countPatentes] = await connection.execute("SELECT COUNT(*) AS count FROM patentes_pendentes;");
+    return countPatentes[0];
+};
+
 module.exports = {
     getAll,
     getAllPages,
     get,
+    countPatentes
 }

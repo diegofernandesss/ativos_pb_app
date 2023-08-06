@@ -8,16 +8,28 @@ const getPatentesConcedidas = async (request, response) => {
     const {page, limit} = request.query;
 
     if (page && limit) {
-        var patentesConcedidas = await patentesConcedidasModel.getAllPage(page, limit);
-    } else {
-        var patentesConcedidas = await patentesConcedidasModel.getAll();
+        let patentesConcedidas = await patentesConcedidasModel.getAllPage(page, limit);
+        let totalPatentes = await patentesConcedidasModel.countPatentes();
+
+        let patentes = patentesConcedidasCorrigidas(patentesConcedidas);
+
+        let qtdPages = Math.ceil(totalPatentes.count/limit);
+        
+        return response.status(200).json({
+            number_pages: qtdPages,
+            patentes
+        });
+
     }
+
+    var patentesConcedidas = await patentesConcedidasModel.getAll();
 
     let patentes = patentesConcedidasCorrigidas(patentesConcedidas);
     
-    return response.status(200).json(patentes);
+    return response.status(200).json({
+        number_patentes: patentes.length,
+        patentes});
 };
-
 
 const getPatenteConcedida = async (request, response) => {
     const {numero_pedido} = request.params;
@@ -35,6 +47,8 @@ const getPatenteConcedida = async (request, response) => {
 };
 
 const getFiltroIpcPatentes = async (request, response) => {
+    const {page, limit} = request.query;
+
     var patentesConcedidas = await patentesConcedidasModel.getAll();
 
     let patentes = patentesConcedidasCorrigidas(patentesConcedidas);
@@ -54,10 +68,31 @@ const getFiltroIpcPatentes = async (request, response) => {
         return response.status(404).json({mensege : "Patente not found!"})
     }
 
-    return response.status(200).json(patentesFiltro)
+    if(page && limit) {
+        let patentesPage = [];
+        let offset = (page - 1) * limit;
+        let tamanho = patentesFiltro.length;
+        let qtdPage = Math.ceil(tamanho/limit);
+        for(let i = offset; i < offset+Number(limit); i++) {
+            if(i >= tamanho) {
+                break;
+            }
+            patentesPage.push(patentesFiltro[i]);
+        }
+        
+        return response.status(200).json({
+            number_pages: qtdPage,
+            patentes : patentesPage
+        });
+    }
+
+    return response.status(200).json({
+        number_patentes: patentesFiltro.length,
+        patentesFiltro
+    });
 };
 
-// Atualizado
+// Filtro por codigo ipc e também pode fazer por ict
 const getFiltroPorCodigoIpc = async (request, response) => {
 
     let {id_sub_secao} = request.params;
@@ -83,7 +118,7 @@ const getFiltroPorCodigoIpc = async (request, response) => {
         return false;
     };
 
-    // Filtragem por IPC
+    // Filtragem por codigos de SubSeção IPC
     let patentesFiltradas = [];
     if(sigla_ict) {
         let [ict] = await ictsModel.getIctSigla(sigla_ict);
@@ -95,7 +130,6 @@ const getFiltroPorCodigoIpc = async (request, response) => {
     } else {
         for(let patente of patentes) {
             if(contemClassificacao(patente,codigosIpc)) {
-                console.log(patente);
                 patentesFiltradas.push(patente);
             }
         }
@@ -106,23 +140,27 @@ const getFiltroPorCodigoIpc = async (request, response) => {
     }
 
     if(page && limit) {
-        let patentePage = [];
+        let patentesPage = [];
         let offset = (page - 1) * limit;
         let tamanho = patentesFiltradas.length;
+        let qtdPage = Math.ceil(tamanho/limit);
         for(let i = offset; i < offset+Number(limit); i++) {
             if(i >= tamanho) {
                 break;
             }
-            patentePage.push(patentesFiltradas[i]);
+            patentesPage.push(patentesFiltradas[i]);
         }
-        patentesFiltradas = patentePage;
+        
+        return response.status(200).json({
+            number_pages: qtdPage,
+            patentes : patentesPage
+        });
     }
 
-    if(!patentesFiltradas) {
-        return response.status(404).json({mensege: "Patentes not found"});
-    }
-    
-    return response.status(200).json(patentesFiltradas);
+    return response.status(200).json({
+        number_patentes: patentesFiltradas.length,
+        patentes: patentesFiltradas
+    });
 };
 
 const getFiltroIctPatentes = async (request, response) => {
@@ -149,57 +187,28 @@ const getFiltroIctPatentes = async (request, response) => {
     }
 
     if(page && limit) {
-        let patentePage = [];
+        let patentesPage = [];
         let offset = (page - 1) * limit;
         let tamanho = patentesFiltrada.length;
+        let qtdPage = Math.ceil(tamanho/limit);
         for(let i = offset; i < offset+Number(limit); i++) {
             if(i >= tamanho) {
                 break;
             }
-            patentePage.push(patentesFiltrada[i]);
+            patentesPage.push(patentesFiltrada[i]);
         }
-        patentesFiltrada = patentePage;
+        
+        return response.status(200).json({
+            number_pages: qtdPage,
+            patentes : patentesPage
+        });
     }
 
-    if(!patentesFiltrada) {
-        return response.status(404).json({mensege: "Patentes not found"});
-    }
 
-    return response.status(200).json(patentesFiltrada);
-
-};
-
-const getFiltroIctIpcPatentes = async (request, response) => {
-    const {cnpj_ict} = request.params;
-    const {classificacao_ipc} = request.params;
-    
-    const patentes = patentesConcedidasCorrigidas(await patentesConcedidasModel.getAll());
-
-    const ict = await ictsModel.getIct(cnpj_ict);
-
-    if (ict.length == 0) {
-        return response.status(404).json({mensege: "ict not found"});
-    }
-    
-    const existeClassificacao = (classes, SecaoClasse) => {
-        for(const classe of classes) {
-            if (classe.slice(0,3) == SecaoClasse)
-                return true
-        }
-        return false
-    }
-
-    const patentesFiltrada = [];
-    for (const patente of patentes) {
-        if (patente["depositantes"].includes(ict[0]["nome"]) && existeClassificacao(patente["classificacoes_ipc"],classificacao_ipc)) {
-            patentesFiltrada.push(patente);       
-        }
-    }
-    if (!patentesFiltrada) {
-        return response.status(404).json({mensege : "Patente not found!"})
-    }
-
-    return response.status(200).json(patentesFiltrada);
+    return response.status(200).json({
+        number_patentes: patentesFiltrada.length,
+        patentes: patentesFiltrada
+    });
 
 };
 
