@@ -16,6 +16,7 @@ const getPatentesConcedidas = async (request, response) => {
         let qtdPages = Math.ceil(totalPatentes.count/limit);
         
         return response.status(200).json({
+            number_patentes : totalPatentes.count,
             number_pages: qtdPages,
             patentes
         });
@@ -38,7 +39,7 @@ const getPatenteConcedida = async (request, response) => {
     const patenteConcedida = await patentesConcedidasModel.get(newNumeroPedido);
 
     if (patenteConcedida.length == 0) {
-        return response.status(401).json({mensege : "Patente not found!"});
+        return response.status(401).json({message : "Patente not found!"});
     }
 
     const patente = patenteConcedidaCorrigida(patenteConcedida[0]);
@@ -65,7 +66,7 @@ const getFiltroIpcPatentes = async (request, response) => {
         }
     }
     if (!patentesFiltro) {
-        return response.status(404).json({mensege : "Patente not found!"})
+        return response.status(404).json({message : "Patente not found!"})
     }
 
     if(page && limit) {
@@ -81,6 +82,7 @@ const getFiltroIpcPatentes = async (request, response) => {
         }
         
         return response.status(200).json({
+            number_patentes: patentesFiltro.length,
             number_pages: qtdPage,
             patentes : patentesPage
         });
@@ -101,7 +103,7 @@ const getFiltroPorCodigoIpc = async (request, response) => {
     // Codigos de SubSeção IPC.
     let codigosSubSecaoIpc = await classificacaoesIpcModel.getCodigosSubSecaoIpc(id_sub_secao);
     if(codigosSubSecaoIpc.length == 0) {
-        return response.status(404).json({mensege: "ipc not found"});
+        return response.status(404).json({message: "ipc not found"});
     }
     let codigosIpc = codigosSubSecaoIpc.map((cod) => { return cod["codigo"]})
 
@@ -136,7 +138,7 @@ const getFiltroPorCodigoIpc = async (request, response) => {
     }
     
     if(!patentesFiltradas) {
-        return response.status(404).json({mensege: "Patentes not found"});
+        return response.status(404).json({message: "Patentes not found"});
     }
 
     if(page && limit) {
@@ -152,6 +154,7 @@ const getFiltroPorCodigoIpc = async (request, response) => {
         }
         
         return response.status(200).json({
+            number_patentes: patentesFiltradas.length,
             number_pages: qtdPage,
             patentes : patentesPage
         });
@@ -169,7 +172,7 @@ const getFiltroIctPatentes = async (request, response) => {
 
     const [ict] = await ictsModel.getIct(cnpj_ict);
     if (ict.length == 0) {
-        return response.status(404).json({mensege: "ict not found"});
+        return response.status(404).json({message: "ict not found"});
     }
 
     let patentesConcedidas = await patentesConcedidasModel.getAll();
@@ -183,7 +186,7 @@ const getFiltroIctPatentes = async (request, response) => {
     }
 
     if (!patentesFiltrada) {
-        return response.status(404).json({mensege : "Patente not found!"})
+        return response.status(404).json({message : "Patente not found!"})
     }
 
     if(page && limit) {
@@ -199,6 +202,7 @@ const getFiltroIctPatentes = async (request, response) => {
         }
         
         return response.status(200).json({
+            number_patentes: patentesFiltrada.length,
             number_pages: qtdPage,
             patentes : patentesPage
         });
@@ -212,10 +216,24 @@ const getFiltroIctPatentes = async (request, response) => {
 
 };
 
+const getPesquisaPatentes = async (request, response) => {
+    let {numero_pedido} = request.params;
+
+    numero_pedido = numero_pedido.replaceAll("_", " ")
+
+    let patentes= await patentesConcedidasModel.pesquisaPatente(numero_pedido);
+
+    return response.status(200).json({
+        number_patentes: patentes.length,
+        patentes
+    });
+};
+
 module.exports = {
     getPatentesConcedidas,
     getPatenteConcedida,
     getFiltroIpcPatentes,
     getFiltroPorCodigoIpc,
     getFiltroIctPatentes,
+    getPesquisaPatentes,
 }

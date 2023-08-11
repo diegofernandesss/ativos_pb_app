@@ -21,9 +21,16 @@ const countPatentes = async () => {
     return countPatentes[0];
 };
 
+const pesquisaPatente = async (numero_pedido) => {
+    let query = 'SELECT numero_pedido, titulo FROM patentes_concedidas WHERE numero_pedido LIKE "'+numero_pedido+'%" LIMIT 10;';
+    const [patentesConcedidas] = await connection.execute(query);
+    return patentesConcedidas;
+}
+
 module.exports = {
     getAll,
     getAllPage,
     get,
-    countPatentes
+    countPatentes,
+    pesquisaPatente
 }

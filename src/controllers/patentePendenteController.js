@@ -14,6 +14,7 @@ const getPatentesPendentes = async (request, response) => {
         let qtdPages = Math.ceil(totalPatentes.count/limit);
         
         return response.status(200).json({
+            number_patentes: totalPatentes.count,
             number_pages: qtdPages,
             patentes
         });
@@ -79,6 +80,7 @@ const getFiltroIctPatentes = async (request, response) => {
         }
         
         return response.status(200).json({
+            number_patentes: patentesFiltrada.length,
             number_pages: qtdPage,
             patentes : patentesPage
         });
@@ -91,8 +93,20 @@ const getFiltroIctPatentes = async (request, response) => {
     });
 };
 
+const getPesquisaPatentes = async (request, response) => {
+    let {numero_pedido} = request.params;
+
+    let patentes= await patentePendenteModel.pesquisaPatente(numero_pedido);
+
+    return response.status(200).json({
+        number_patentes: patentes.length,
+        patentes
+    });
+}
+
 module.exports = {
     getPatentesPendentes,
     getPatentePendente,
     getFiltroIctPatentes,
+    getPesquisaPatentes
 }

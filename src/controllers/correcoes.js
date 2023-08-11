@@ -114,10 +114,47 @@ const patentePendenteCorrigida = (patente) => {
     };
 }
 
+const registroSoftwareCorrigido = (registro) => {
+    let data_deposito = new Date(registro["data_deposito"]).toLocaleDateString();
+    let nomes_titulares = registro["nomes_titulares"].split("/");
+    let linguagem_desenvolvimento = registro["linguagem_desenvolvimento"].split("/");
+    let campo_aplicacao = registro["campo_aplicacao"].split("/");
+    let tipo_programa = registro["tipo_programa"].split("/");
+    let nomes_autores = registro["nomes_autores"].split("/");
+    return {
+        "numero_pedido": registro["numero_pedido"],
+        "titulo_programa": registro["titulo_programa"],
+        data_deposito,
+        linguagem_desenvolvimento,
+        campo_aplicacao,
+        tipo_programa,
+        nomes_autores,
+        nomes_titulares
+    };
+};
+
+const registrosSoftwareCorrigidos = (registros) => {
+
+    let corrigidos = registros.map((registro) => {
+        let data_deposito = new Date(registro["data_deposito"]).toLocaleDateString();
+        let nomes_titulares = registro["nomes_titulares"].split("/");
+        return {
+            "numero_pedido": registro["numero_pedido"],
+            "titulo_programa": registro["titulo_programa"],
+            data_deposito,
+            nomes_titulares
+        };
+    });
+
+    return corrigidos;
+};
+
 module.exports = {
     removedorEspacos,
     patentesConcedidasCorrigidas,
     patenteConcedidaCorrigida,
     patentesPendentesCorrigidas,
-    patentePendenteCorrigida
+    patentePendenteCorrigida,
+    registroSoftwareCorrigido,
+    registrosSoftwareCorrigidos,
 }
