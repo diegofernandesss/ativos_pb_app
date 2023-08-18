@@ -39,7 +39,7 @@ const getPatenteConcedida = async (request, response) => {
     const patenteConcedida = await patentesConcedidasModel.get(newNumeroPedido);
 
     if (patenteConcedida.length == 0) {
-        return response.status(401).json({message : "Patente not found!"});
+        return response.status(404).json({message : "Patente not found!"});
     }
 
     const patente = patenteConcedidaCorrigida(patenteConcedida[0]);
